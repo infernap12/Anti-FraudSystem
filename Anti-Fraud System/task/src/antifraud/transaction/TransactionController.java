@@ -7,9 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-
-import java.util.Objects;
-
 @Controller
 @RequestMapping("/api/antifraud/transaction")
 public final class TransactionController {
@@ -20,7 +17,6 @@ public final class TransactionController {
         this.service = service;
     }
 
-    // todo handle null incoming amount
     @PostMapping
     ResponseEntity<TransactionResponse> postTransaction(@RequestBody TransactionRequest request) {
         if (request.amount() <= 0) {
