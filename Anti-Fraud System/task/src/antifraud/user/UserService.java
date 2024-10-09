@@ -1,10 +1,13 @@
 package antifraud.user;
 
+import antifraud.auth.UserRole;
 import lombok.val;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -17,19 +20,28 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws org.springframework.security.core.userdetails.UsernameNotFoundException {
-        UserEntity user = repo
-                .findByUsernameIgnoreCase(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return user.asUserDetails();
+    public UserDetails loadUserByUsername(String username) {
+        return getUser(username).asUserDetails();
     }
 
     public UserEntity registerUser(String name, String username, String password) {
-        val user = new UserEntity(name, username, password);
         if (repo.existsByUsernameIgnoreCase(username)) {
-            throw new UsernameInUseException("User already registered");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already registered");
         }
-        return repo.save(user);
+        val user = new UserEntity(name, username, password);
+        val returnedUser = repo.save(user);
+
+        if (returnedUser.getId() == 1) {
+            returnedUser.setRole(UserRole.ADMINISTRATOR);
+            returnedUser.setLocked(false);
+        }
+        return repo.save(returnedUser);
+    }
+
+    public UserEntity getUser(String username) {
+        return repo
+                .findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     public List<UserEntity> getAllUsers() {
@@ -40,10 +52,40 @@ public class UserService implements UserDetailsService {
         return repo.findAll(sort);
     }
 
-    public List<UserEntity> deleteUser(String username) {
-        if (!repo.existsByUsernameIgnoreCase(username)) {
-            throw new UsernameNotFoundException("User not found");
+
+    public void deleteUser(UserEntity user) {
+        repo.delete(user);
+    }
+
+    public void deleteUser(String username) {
+        val user = getUser(username);
+        deleteUser(user);
+    }
+
+    public UserEntity modifyRole(String username, UserRole role) {
+        val user = getUser(username);
+        return modifyRole(user, role);
+    }
+
+    public UserEntity modifyRole(UserEntity user, UserRole role) {
+        if (user.getRole().equals(role)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Role already assigned");
         }
-        return repo.deleteByUsernameIgnoreCase(username);
+
+        user.setRole(role);
+
+        return repo.save(user);
+    }
+
+    public void modifyLock(String username, boolean lock) {
+        modifyLock(getUser(username), lock);
+    }
+
+    public void modifyLock(UserEntity user, boolean lock) {
+        if (user.getRole() == UserRole.ADMINISTRATOR) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot lock administrator account");
+        }
+        user.setLocked(lock);
+        repo.save(user);
     }
 }

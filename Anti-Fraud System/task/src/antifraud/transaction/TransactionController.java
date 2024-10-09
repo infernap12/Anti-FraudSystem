@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
-@RequestMapping("/api/antifraud/transaction")
+@RequestMapping({"/api/antifraud/transaction/", "/api/antifraud/transaction"})
 public final class TransactionController {
 
     private final TransactionService service;
@@ -27,10 +27,5 @@ public final class TransactionController {
 
         return ResponseEntity.ok(response);
 
-    }
-
-    @GetMapping
-    ResponseEntity<TransactionResponse> getTransaction(@RequestBody TransactionRequest request) {
-        return ResponseEntity.ok(new TransactionResponse("Nah champ"));
     }
 }

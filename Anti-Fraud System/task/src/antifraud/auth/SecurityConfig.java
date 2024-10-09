@@ -1,4 +1,4 @@
-package antifraud;
+package antifraud.auth;
 
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -20,12 +20,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .headers().frameOptions().sameOrigin().and()
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/auth/user")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/auth/user/**")).authenticated()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/auth/list")).authenticated()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/antifraud/transaction")).authenticated()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/user")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/api/auth/user/**")).hasAuthority(Authority.WRITE_USER.getAuthority())
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/list/**")).hasAuthority(Authority.READ_USER.getAuthority())
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/antifraud/transaction/**")).hasAuthority(Authority.EXECUTE_TRANSACTION.getAuthority())
+                        .requestMatchers(HttpMethod.PUT, "/api/auth/access/**", "/api/auth/role/**").hasAuthority(Authority.WRITE_USER.getAuthority())
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/shutdown")).permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll().requestMatchers("/error").permitAll()
                         .anyRequest().permitAll()

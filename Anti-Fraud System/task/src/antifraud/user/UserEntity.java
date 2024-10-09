@@ -1,13 +1,16 @@
 package antifraud.user;
 
+import antifraud.auth.Authority;
+import antifraud.auth.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
 
 @Getter
@@ -20,13 +23,13 @@ public class UserEntity {
     @Id
     @GeneratedValue
     private Long id;
-    
+
     @Column(unique = true)
     private String username;
     private String password;
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "USER_AUTHORITIES")
-    private List<String> authorities;
+    private UserRole role = UserRole.MERCHANT;
+    @Column(columnDefinition = "boolean default true")
+    private boolean locked = true;
 
     private String name;
 
@@ -53,7 +56,11 @@ public class UserEntity {
     }
 
     UserDetails asUserDetails() {
-        List<SimpleGrantedAuthority> auths = authorities.stream().map(SimpleGrantedAuthority::new).toList();
-        return new User(username, password, auths);
+        val auths = new HashSet<GrantedAuthority>();
+        auths.add(new SimpleGrantedAuthority(role.getRole()));
+        for (Authority auth : role.getAuthorities()) {
+            auths.add(new SimpleGrantedAuthority(auth.getAuthority()));
+        }
+        return new User(username, password, true, true, true, !locked, auths);
     }
 }
