@@ -10,7 +10,7 @@ import java.util.Set;
 public enum UserRole {
     ADMINISTRATOR(Authority.READ_USER, Authority.WRITE_USER),
     MERCHANT(Authority.EXECUTE_TRANSACTION),
-    SUPPORT(Authority.READ_USER);
+    SUPPORT(Authority.READ_USER, Authority.STOLEN_CARD, Authority.SUSPICIOUS_IP);
 
     private final Set<Authority> authorities;
 

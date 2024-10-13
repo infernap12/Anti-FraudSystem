@@ -1,7 +1,6 @@
-package antifraud.user;
+package antifraud.auth.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 
 import java.io.Serializable;
 

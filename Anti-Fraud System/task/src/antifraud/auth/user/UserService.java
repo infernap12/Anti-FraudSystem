@@ -1,4 +1,4 @@
-package antifraud.user;
+package antifraud.auth.user;
 
 import antifraud.auth.UserRole;
 import lombok.val;

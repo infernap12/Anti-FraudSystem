@@ -1,9 +1,8 @@
-package antifraud.user;
+package antifraud.auth.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -12,5 +11,4 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Boolean existsByUsernameIgnoreCase(String username);
 
-    List<UserEntity> deleteByUsernameIgnoreCase(String username);
 }

@@ -1,4 +1,4 @@
-package antifraud.transaction;
+package antifraud.api.antifraud.transaction;
 
 public enum TransactionVerdict {
     ALLOWED,

@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+// todo rewrite in kotlin, extension function, accept enum
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -27,6 +29,8 @@ public class SecurityConfig {
                         .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/api/auth/user/**")).hasAuthority(Authority.WRITE_USER.getAuthority())
                         .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/list/**")).hasAuthority(Authority.READ_USER.getAuthority())
                         .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/antifraud/transaction/**")).hasAuthority(Authority.EXECUTE_TRANSACTION.getAuthority())
+                        .requestMatchers("/api/antifraud/suspicious-ip/**").hasAuthority(Authority.SUSPICIOUS_IP.getAuthority())
+                        .requestMatchers("/api/antifraud/stolencard/**").hasAuthority(Authority.STOLEN_CARD.getAuthority())
                         .requestMatchers(HttpMethod.PUT, "/api/auth/access/**", "/api/auth/role/**").hasAuthority(Authority.WRITE_USER.getAuthority())
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/shutdown")).permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll().requestMatchers("/error").permitAll()

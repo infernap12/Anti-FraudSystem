@@ -1,6 +1,6 @@
-package antifraud.user;
+package antifraud.auth;
 
-import antifraud.auth.UserRole;
+import antifraud.auth.user.*;
 import lombok.val;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +14,10 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/api/auth/")
-public class UserController {
+public class AuthController {
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public AuthController(UserService userService) {
         this.userService = userService;
     }
 
@@ -51,7 +51,7 @@ public class UserController {
         System.out.println(request.operation());
         userService.modifyLock(request.username(), request.getLock());
 
-        final String status = "User " + request.username() + " " + request.operation().post + "!";
+        final String status = "User " + request.username() + " " + request.operation().getPost() + "!";
         final Map<String, String> response = Map.of("status", status);
         return ResponseEntity.ok(response);
     }

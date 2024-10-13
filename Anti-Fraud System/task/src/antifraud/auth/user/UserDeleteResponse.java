@@ -1,7 +1,7 @@
-package antifraud.user;
+package antifraud.auth.user;
 
 public record UserDeleteResponse(String username, String status) {
-    UserDeleteResponse(String username) {
+    public UserDeleteResponse(String username) {
         this(username, "Deleted successfully!");
     }
 }

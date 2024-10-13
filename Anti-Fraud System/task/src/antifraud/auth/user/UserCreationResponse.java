@@ -1,7 +1,10 @@
-package antifraud.user;
+package antifraud.auth.user;
 
 import antifraud.auth.UserRole;
 
+/**
+ * DTO for {@link UserEntity}
+ */
 public record UserCreationResponse(
         long id,
         String name,

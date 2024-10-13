@@ -1,4 +1,4 @@
-package antifraud.user;
+package antifraud.auth.user;
 
 import antifraud.auth.Authority;
 import antifraud.auth.UserRole;
@@ -17,7 +17,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
-@Entity
+@Entity(name = "User")
 @Table(name = "users")
 public class UserEntity {
     @Id
@@ -63,4 +63,6 @@ public class UserEntity {
         }
         return new User(username, password, true, true, true, !locked, auths);
     }
+
+
 }
