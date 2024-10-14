@@ -1,7 +1,7 @@
-package antifraud.auth.user;
+package antifraud.api.auth.user;
 
-import antifraud.auth.Authority;
-import antifraud.auth.UserRole;
+import antifraud.api.auth.Authority;
+import antifraud.api.auth.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;

@@ -1,6 +1,6 @@
-package antifraud.auth.user;
+package antifraud.api.auth.user;
 
-import antifraud.auth.UserRole;
+import antifraud.api.auth.UserRole;
 
 /**
  * DTO for {@link UserEntity}

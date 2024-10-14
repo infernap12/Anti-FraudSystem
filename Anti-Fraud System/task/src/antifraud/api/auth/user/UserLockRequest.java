@@ -1,6 +1,4 @@
-package antifraud.auth.user;
-
-import lombok.Getter;
+package antifraud.api.auth.user;
 
 public record UserLockRequest(
         String username,
@@ -13,12 +11,15 @@ public record UserLockRequest(
         };
     }
 
-    @Getter
     public enum UserLock {
         LOCK("locked"),
         UNLOCK("unlocked");
 
         final String post;
+
+        public String getPost() {
+            return post;
+        }
 
         UserLock(String post) {
             this.post = post;

@@ -1,4 +1,4 @@
-package antifraud.auth.user;
+package antifraud.api.auth.user;
 
 public record UserDeleteResponse(String username, String status) {
     public UserDeleteResponse(String username) {
