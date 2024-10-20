@@ -17,6 +17,6 @@ Topics
 # old stages
 /Anti-Fraud System/*
 !/Anti-Fraud System/task/
-/Anti-Fraud System/task/*
-!/Anti-Fraud System/task/src
+/Anti-Fraud System/task/test
+/Anti-Fraud System/task/out
 

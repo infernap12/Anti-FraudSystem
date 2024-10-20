@@ -6,23 +6,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.net.InetAddress;
-
 @Setter
 @Getter
 @Entity
 @ToString
 @RequiredArgsConstructor
 @Table(name = "SUSPICIOUS_IPS")
-public class IpEntity {
+public class SuspiciousIp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private InetAddress ip;
+    private String ip;
 
-    public IpEntity(InetAddress ip) {
+    public SuspiciousIp(String ip) {
         this.ip = ip;
     }
 }

@@ -1,6 +1,6 @@
-package antifraud.auth;
+package antifraud.api.auth;
 
-import antifraud.auth.user.*;
+import antifraud.api.auth.user.*;
 import lombok.val;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

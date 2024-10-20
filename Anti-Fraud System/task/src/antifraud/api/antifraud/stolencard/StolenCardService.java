@@ -12,8 +12,8 @@ import us.fatehi.creditcardnumber.AccountNumbers;
 import java.util.List;
 
 @Service
-public class CardService {
-    final CardEntityRepository repo;
+public class StolenCardService {
+    final StolenCardRepository repo;
 
     public boolean exists(String card) {
         return exists(AccountNumbers.completeAccountNumber(card));
@@ -31,15 +31,15 @@ public class CardService {
         return accountNumber.isPrimaryAccountNumberValid();
     }
 
-    public CardService(@Autowired CardEntityRepository repo) {
+    public StolenCardService(@Autowired StolenCardRepository repo) {
         this.repo = repo;
     }
 
-    public CardEntity getCard(String number) {
+    public StolenCard getCard(String number) {
         return getCard(AccountNumbers.completeAccountNumber(number));
     }
 
-    public CardEntity getCard(AccountNumber accountNumber) {
+    public StolenCard getCard(AccountNumber accountNumber) {
         if (!accountNumber.isPrimaryAccountNumberValid()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad card number");
         }
@@ -49,18 +49,18 @@ public class CardService {
     }
 
 
-    public CardEntity registerCard(String accountNumber) {
+    public StolenCard registerCard(String accountNumber) {
         return registerCard(AccountNumbers.completeAccountNumber(accountNumber));
     }
 
-    public CardEntity registerCard(AccountNumber accountNumber) {
+    public StolenCard registerCard(AccountNumber accountNumber) {
         if (!accountNumber.isPrimaryAccountNumberValid()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad card number");
         }
         if (repo.existsByNumber(accountNumber.getAccountNumber())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Card already registered");
         }
-        val cardE = new CardEntity(accountNumber);
+        val cardE = new StolenCard(accountNumber);
 
         return repo.save(cardE);
     }
@@ -69,15 +69,15 @@ public class CardService {
         deleteCard(getCard(accountNumber));
     }
 
-    public void deleteCard(CardEntity cardEntity) {
-        repo.delete(cardEntity);
+    public void deleteCard(StolenCard stolenCard) {
+        repo.delete(stolenCard);
     }
 
-    public List<CardEntity> getAllCards() {
+    public List<StolenCard> getAllCards() {
         return getAllCards(Sort.by(Sort.Order.asc("id")));
     }
 
-    public List<CardEntity> getAllCards(Sort sort) {
+    public List<StolenCard> getAllCards(Sort sort) {
         return repo.findAll(sort);
     }
 }

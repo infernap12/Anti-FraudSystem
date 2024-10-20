@@ -5,13 +5,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import us.fatehi.creditcardnumber.AccountNumber;
+import us.fatehi.creditcardnumber.AccountNumbers;
 
 @Getter
 @Setter
 @Entity
 @RequiredArgsConstructor
 @Table(name = "STOLEN_CARDS")
-public class CardEntity {
+public class StolenCard {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -20,7 +21,11 @@ public class CardEntity {
     @Column(name = "card_number", unique = true)
     private String number;
 
-    public CardEntity(AccountNumber accountNumber) {
+    public StolenCard(AccountNumber accountNumber) {
         this.number = accountNumber.getAccountNumber();
+    }
+
+    public AccountNumber asAccountNumber() {
+        return AccountNumbers.completeAccountNumber(number);
     }
 }

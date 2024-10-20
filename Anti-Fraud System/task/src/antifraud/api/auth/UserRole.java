@@ -1,4 +1,4 @@
-package antifraud.auth;
+package antifraud.api.auth;
 
 import lombok.Getter;
 

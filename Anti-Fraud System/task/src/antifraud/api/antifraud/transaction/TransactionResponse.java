@@ -2,43 +2,35 @@ package antifraud.api.antifraud.transaction;
 
 import lombok.val;
 
-import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public record TransactionResponse(String result, String info) {
-    public static TransactionResponse fromVerdict(TransactionVerdict verdict, List<String> reasons) {
-        final String info;
-        if (reasons.isEmpty()) {
-            info = "none";
+
+    public static TransactionResponse fromTestMap(EnumMap<TransactionTests, TransactionVerdict> resultSet) {
+        String info;
+        TransactionVerdict verdict;
+        if (resultSet.containsValue(TransactionVerdict.PROHIBITED)) {
+            verdict = TransactionVerdict.PROHIBITED;
+            info = getInfoString(resultSet, verdict);
+        } else if (resultSet.containsValue(TransactionVerdict.MANUAL_PROCESSING)) {
+            verdict = TransactionVerdict.MANUAL_PROCESSING;
+            info = getInfoString(resultSet, verdict);
         } else {
-            info = reasons.stream().sorted().collect(Collectors.joining(", "));
+            verdict = TransactionVerdict.ALLOWED;
+            info = "none";
         }
         return new TransactionResponse(verdict.name(), info);
     }
 
-    public static TransactionResponse fromVerdict(TransactionVerdict amountVerdict, boolean isCard, boolean isIp) {
-        List<String> reasons = new ArrayList<>();
-        final TransactionVerdict verdict;
-        val isAmount = amountVerdict == TransactionVerdict.PROHIBITED;
-        if (isCard || isIp || isAmount) {
-            verdict = TransactionVerdict.PROHIBITED;
-            if (isCard) {
-                reasons.add("card-number");
-            }
-            if (isIp) {
-                reasons.add("ip");
-            }
-            if (isAmount) {
-                reasons.add("amount");
-            }
-        } else if (amountVerdict == TransactionVerdict.MANUAL_PROCESSING) {
-            reasons.add("amount");
-            verdict = TransactionVerdict.MANUAL_PROCESSING;
-        } else {
-            reasons.add("none");
-            verdict = TransactionVerdict.ALLOWED;
-        }
-        return fromVerdict(verdict, reasons);
+    private static String getInfoString(EnumMap<TransactionTests, TransactionVerdict> resultSet, TransactionVerdict verdict) {
+        return resultSet.entrySet().stream()
+                .filter(entry -> entry.getValue() == verdict)
+                .map(Map.Entry::getKey)
+                .map(TransactionTests::toString)
+                .sorted()
+                .collect(Collectors.joining(", "));
     }
 }
