@@ -1,15 +1,15 @@
 package antifraud.api.antifraud;
 
-import antifraud.api.antifraud.stolencard.CardEntity;
-import antifraud.api.antifraud.stolencard.CardRequest;
-import antifraud.api.antifraud.stolencard.CardResponse;
-import antifraud.api.antifraud.stolencard.CardService;
-import antifraud.api.antifraud.suspiciousIp.IpEntityView;
-import antifraud.api.antifraud.suspiciousIp.IpService;
-import antifraud.api.antifraud.suspiciousIp.IpRequest;
-import antifraud.api.antifraud.transaction.TransactionRequest;
-import antifraud.api.antifraud.transaction.TransactionResponse;
-import antifraud.api.antifraud.transaction.TransactionService;
+import antifraud.IpAddress;
+import antifraud.IpAddressValidator;
+import antifraud.api.antifraud.stolencard.StolenCard;
+import antifraud.api.antifraud.stolencard.StolenCardCreationRequest;
+import antifraud.api.antifraud.stolencard.StolenCardView;
+import antifraud.api.antifraud.stolencard.StolenCardService;
+import antifraud.api.antifraud.suspiciousIp.SuspiciousIpView;
+import antifraud.api.antifraud.suspiciousIp.SuspiciousIpService;
+import antifraud.api.antifraud.suspiciousIp.SuspiciousIpCreationRequest;
+import antifraud.api.antifraud.transaction.*;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,28 +22,29 @@ import org.springframework.stereotype.Controller;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 @Controller
 @RequestMapping("/api/antifraud")
 public class AntiFraudController {
-    private final IpService ipService;
-    private final CardService cardService;
+    private final SuspiciousIpService ipService;
+    private final StolenCardService cardService;
     private final TransactionService service;
 
     public AntiFraudController(@Autowired TransactionService service,
-                               @Autowired IpService ipService,
-                               @Autowired CardService cardService) {
+                               @Autowired SuspiciousIpService ipService,
+                               @Autowired StolenCardService cardService) {
         this.service = service;
         this.ipService = ipService;
         this.cardService = cardService;
     }
 
     @PostMapping({"/stolencard", "/stolencard/"})
-    public ResponseEntity<CardResponse> postCard(@RequestBody CardRequest card) {
-        final CardEntity cardEntity = cardService.registerCard(card.number());
-        return ResponseEntity.ok(new CardResponse(cardEntity));
+    public ResponseEntity<StolenCardView> postCard(@RequestBody StolenCardCreationRequest card) {
+        final StolenCard stolenCard = cardService.registerCard(card.number());
+        return ResponseEntity.ok(new StolenCardView(stolenCard));
     }
 
     @Transactional
@@ -55,36 +56,40 @@ public class AntiFraudController {
     }
 
     @GetMapping({"/stolencard", "/stolencard/"})
-    public ResponseEntity<List<CardResponse>> getCard() {
+    public ResponseEntity<List<StolenCardView>> getCard() {
         val cards = cardService.getAllCards();
-        val body = cards.stream().map(CardResponse::new).toList();
+        val body = cards.stream().map(StolenCardView::new).toList();
         return ResponseEntity.ok(body);
     }
 
     @PostMapping({"/suspicious-ip", "/suspicious-ip/"})
-    public ResponseEntity<IpEntityView> postIp(@RequestBody IpRequest request) {
-        final InetAddress inetAddress;
-        try {
-            inetAddress = InetAddress.getByName(request.ip());
-        } catch (UnknownHostException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ip");
-        }
-        val ipEntity = ipService.createIP(inetAddress);
-        return ResponseEntity.ok(new IpEntityView(ipEntity));
+    public ResponseEntity<SuspiciousIpView> postIp(
+            @RequestBody
+            @Validated
+            SuspiciousIpCreationRequest request
+    ) {
+        val ipEntity = ipService.createIP(request.ip());
+        return ResponseEntity.ok(new SuspiciousIpView(ipEntity));
     }
 
     @Transactional
     @DeleteMapping({"/suspicious-ip/{ip}", "/suspicious-ip/{ip}/"})
-    ResponseEntity<Map<String, String>> deleteIp(@PathVariable String ip) {
+    ResponseEntity<Map<String, String>> deleteIp(
+            @PathVariable
+            String ip
+    ) {
+        if (!new IpAddressValidator().isValid(ip)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         ipService.deleteIp(ip);
         val response = Map.of("status", "IP " + ip + " successfully removed!");
         return ResponseEntity.ok(response);
     }
 
     @GetMapping({"/suspicious-ip", "/suspicious-ip/"})
-    ResponseEntity<List<IpEntityView>> getIps() {
+    ResponseEntity<List<SuspiciousIpView>> getIps() {
         val ips = ipService.getAllIps();
-        val body = ips.stream().map(IpEntityView::new).toList();
+        val body = ips.stream().map(SuspiciousIpView::new).toList();
         return ResponseEntity.ok(body);
     }
 
@@ -98,14 +103,11 @@ public class AntiFraudController {
         if (!cardService.isValid(request.number()) || !ipService.isValid(request.ip())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        val isCard = cardService.exists(request.number());
-        val isIp = ipService.exists(request.ip());
-        val amountVerdict = service.validate(request.amount());
+        final Transaction transaction = service.saveTransaction(Transaction.fromRequest(request));
+        final EnumMap<TransactionTests, TransactionVerdict> resultSet = service.validate(transaction);
 
 
-
-
-        final TransactionResponse response = TransactionResponse.fromVerdict(amountVerdict, isCard, isIp);
+        final TransactionResponse response = TransactionResponse.fromTestMap(resultSet);
 
         return ResponseEntity.ok(response);
     }

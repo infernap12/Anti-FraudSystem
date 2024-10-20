@@ -2,15 +2,24 @@ package antifraud.api.antifraud.transaction;
 
 import org.springframework.stereotype.Service;
 
+import java.util.EnumMap;
+
 @Service
 public class TransactionService {
-    public TransactionVerdict validate(Long amount) {
-        if (amount <= 200) {
-            return TransactionVerdict.ALLOWED;
-        } else if (amount <= 1500) {
-            return TransactionVerdict.MANUAL_PROCESSING;
-        } else {
-            return TransactionVerdict.PROHIBITED;
-        }
+    private final TransactionRepository repo;
+    private final TransactionProcessor processor;
+
+    public TransactionService(TransactionRepository repo, TransactionProcessor processor) {
+        this.repo = repo;
+        this.processor = processor;
+    }
+
+
+    public EnumMap<TransactionTests, TransactionVerdict> validate(Transaction transaction) {
+        return processor.validate(transaction);
+    }
+
+    public Transaction saveTransaction(Transaction transaction) {
+        return repo.save(transaction);
     }
 }

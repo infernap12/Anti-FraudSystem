@@ -1,5 +1,6 @@
 package antifraud.api.antifraud.suspiciousIp;
 
+import antifraud.IpAddressValidator;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -12,22 +13,15 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 @Service
-public class IpService {
-    final IpEntityRepository repo;
+public class SuspiciousIpService {
+    final SuspiciousIpRepository repo;
 
     public boolean exists(String ip) {
-        try {
-            return exists(InetAddress.getByName(ip));
-        } catch (UnknownHostException e) {
-            return false;
-        }
-    }
-
-    public boolean exists(InetAddress ip) {
         return repo.existsByIp(ip);
     }
 
     public boolean isValid(String ip) {
+        new IpAddressValidator().isValid(ip,null);
         try {
             InetAddress.getByName(ip);
         } catch (UnknownHostException e) {
@@ -36,31 +30,21 @@ public class IpService {
         return true;
     }
 
-    public IpService(@Autowired IpEntityRepository repo) {
+    public SuspiciousIpService(@Autowired SuspiciousIpRepository repo) {
         this.repo = repo;
     }
 
-    public IpEntity getIp(InetAddress ip) {
+    public SuspiciousIp getIp(String ip) {
         return repo
                 .findByIp(ip)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ip not found"));
     }
 
-    public IpEntity getIp(String ip) {
-        final InetAddress inetAddress;
-        try {
-            inetAddress = InetAddress.getByName(ip);
-        } catch (UnknownHostException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ip");
-        }
-        return getIp(inetAddress);
-    }
-
-    public IpEntity createIP(InetAddress ip) {
+    public SuspiciousIp createIP(String ip) {
         if (repo.existsByIp(ip)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ip already registered");
         }
-        val address = new IpEntity(ip);
+        val address = new SuspiciousIp(ip);
 
         return repo.save(address);
     }
@@ -69,15 +53,15 @@ public class IpService {
         deleteIp(getIp(ip));
     }
 
-    public void deleteIp(IpEntity ipEntity) {
+    public void deleteIp(SuspiciousIp ipEntity) {
         repo.delete(ipEntity);
     }
 
-    public List<IpEntity> getAllIps() {
+    public List<SuspiciousIp> getAllIps() {
         return getAllIps(Sort.by(Sort.Order.asc("id")));
     }
 
-    public List<IpEntity> getAllIps(Sort sort) {
+    public List<SuspiciousIp> getAllIps(Sort sort) {
         return repo.findAll(sort);
     }
 }

@@ -1,11 +1,12 @@
 package antifraud.api.antifraud.transaction;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import us.fatehi.creditcardnumber.AccountNumber;
+import us.fatehi.creditcardnumber.AccountNumbers;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     private long amount;
 
@@ -28,4 +29,22 @@ public class Transaction {
     private Region region;
 
     private LocalDateTime date;
+
+    public InetAddress getInet() throws UnknownHostException {
+        return InetAddress.getByName(ip);
+    }
+
+    public AccountNumber getAccountNumber() {
+        return AccountNumbers.completeAccountNumber(number);
+    }
+
+    public static Transaction fromRequest(TransactionRequest request) {
+        val transaction = new Transaction();
+        transaction.setAmount(request.amount());
+        transaction.setIp(request.ip());
+        transaction.setNumber(request.number());
+        transaction.setRegion(request.region());
+        transaction.setDate(request.date());
+        return transaction;
+    }
 }

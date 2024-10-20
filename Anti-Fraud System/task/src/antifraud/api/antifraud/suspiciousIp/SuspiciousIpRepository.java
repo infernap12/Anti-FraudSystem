@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.net.InetAddress;
 import java.util.Optional;
 
-public interface IpEntityRepository extends JpaRepository<IpEntity, Long> {
-    boolean existsByIp(InetAddress ip);
+public interface SuspiciousIpRepository extends JpaRepository<SuspiciousIp, Long> {
+    boolean existsByIp(String ip);
 
-    Optional<IpEntity> findByIp(InetAddress ip);
+    Optional<SuspiciousIp> findByIp(String ip);
 }
