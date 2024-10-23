@@ -6,11 +6,17 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
 
+import static antifraud.api.auth.Authority.*;
+
 @Getter
 public enum UserRole {
-    ADMINISTRATOR(Authority.READ_USER, Authority.WRITE_USER),
-    MERCHANT(Authority.EXECUTE_TRANSACTION),
-    SUPPORT(Authority.READ_USER, Authority.STOLEN_CARD, Authority.SUSPICIOUS_IP);
+    ADMINISTRATOR(READ_USER, WRITE_USER),
+    MERCHANT(EXECUTE_TRANSACTION),
+    SUPPORT(READ_USER,
+            STOLEN_CARD,
+            SUSPICIOUS_IP,
+            READ_TRANSACTION,
+            WRITE_TRANSACTION);
 
     private final Set<Authority> authorities;
 

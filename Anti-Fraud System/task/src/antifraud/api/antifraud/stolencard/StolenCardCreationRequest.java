@@ -1,5 +1,6 @@
 package antifraud.api.antifraud.stolencard;
 
+import antifraud.validation.CardNumber;
 import org.hibernate.validator.constraints.CreditCardNumber;
 
 import java.io.Serializable;
@@ -8,6 +9,6 @@ import java.io.Serializable;
  Creation request for {@link StolenCard}
  */
 public record StolenCardCreationRequest(
-        @CreditCardNumber String number
+        @CardNumber String number
 ) implements Serializable {
 }

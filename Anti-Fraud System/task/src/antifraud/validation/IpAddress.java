@@ -1,4 +1,4 @@
-package antifraud;
+package antifraud.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

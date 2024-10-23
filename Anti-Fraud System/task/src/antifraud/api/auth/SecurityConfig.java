@@ -29,6 +29,8 @@ public class SecurityConfig {
                         .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/api/auth/user/**")).hasAuthority(Authority.WRITE_USER.getAuthority())
                         .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/list/**")).hasAuthority(Authority.READ_USER.getAuthority())
                         .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/antifraud/transaction/**")).hasAuthority(Authority.EXECUTE_TRANSACTION.getAuthority())
+                        .requestMatchers(HttpMethod.PUT, "/api/antifraud/transaction").hasAuthority(Authority.WRITE_TRANSACTION.getAuthority())
+                        .requestMatchers(HttpMethod.GET, "/api/antifraud/history/**").hasAuthority(Authority.READ_TRANSACTION.getAuthority())
                         .requestMatchers("/api/antifraud/suspicious-ip/**").hasAuthority(Authority.SUSPICIOUS_IP.getAuthority())
                         .requestMatchers("/api/antifraud/stolencard/**").hasAuthority(Authority.STOLEN_CARD.getAuthority())
                         .requestMatchers(HttpMethod.PUT, "/api/auth/access/**", "/api/auth/role/**").hasAuthority(Authority.WRITE_USER.getAuthority())

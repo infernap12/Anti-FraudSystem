@@ -1,12 +1,10 @@
 package antifraud.api.antifraud.transaction;
 
 
-import antifraud.IpAddress;
+import antifraud.validation.CardNumber;
+import antifraud.validation.IpAddress;
 import jakarta.validation.constraints.Min;
-import org.hibernate.validator.constraints.CreditCardNumber;
-import org.springframework.validation.Validator;
 
-import java.net.InetAddress;
 import java.time.LocalDateTime;
 
 public record TransactionRequest(
@@ -15,7 +13,7 @@ public record TransactionRequest(
         long amount,
         @IpAddress
         String ip,
-        @CreditCardNumber
+        @CardNumber
         String number,
         Region region,
         LocalDateTime date) {

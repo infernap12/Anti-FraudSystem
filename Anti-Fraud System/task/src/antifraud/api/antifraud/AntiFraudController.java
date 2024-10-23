@@ -1,7 +1,8 @@
 package antifraud.api.antifraud;
 
-import antifraud.IpAddress;
-import antifraud.IpAddressValidator;
+import antifraud.validation.CardNumber;
+import antifraud.validation.CardNumberValidator;
+import antifraud.validation.IpAddressValidator;
 import antifraud.api.antifraud.stolencard.StolenCard;
 import antifraud.api.antifraud.stolencard.StolenCardCreationRequest;
 import antifraud.api.antifraud.stolencard.StolenCardView;
@@ -11,6 +12,7 @@ import antifraud.api.antifraud.suspiciousIp.SuspiciousIpService;
 import antifraud.api.antifraud.suspiciousIp.SuspiciousIpCreationRequest;
 import antifraud.api.antifraud.transaction.*;
 import lombok.val;
+import org.hibernate.validator.constraints.CreditCardNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Controller;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -32,13 +32,15 @@ public class AntiFraudController {
     private final SuspiciousIpService ipService;
     private final StolenCardService cardService;
     private final TransactionService service;
+    private final CardNumberValidator cardNumberValidator;
 
     public AntiFraudController(@Autowired TransactionService service,
                                @Autowired SuspiciousIpService ipService,
-                               @Autowired StolenCardService cardService) {
+                               @Autowired StolenCardService cardService, CardNumberValidator cardNumberValidator) {
         this.service = service;
         this.ipService = ipService;
         this.cardService = cardService;
+        this.cardNumberValidator = cardNumberValidator;
     }
 
     @PostMapping({"/stolencard", "/stolencard/"})
@@ -98,6 +100,7 @@ public class AntiFraudController {
     //else bad return
     //todo refactor please, its god awful
     //consider mapping using bool table
+    @Transactional
     @PostMapping({"/transaction", "/transaction/"})
     ResponseEntity<TransactionResponse> postTransaction(@RequestBody @Validated TransactionRequest request) {
         if (!cardService.isValid(request.number()) || !ipService.isValid(request.ip())) {
@@ -106,11 +109,33 @@ public class AntiFraudController {
         final Transaction transaction = service.saveTransaction(Transaction.fromRequest(request));
         final EnumMap<TransactionTests, TransactionVerdict> resultSet = service.validate(transaction);
 
-
         final TransactionResponse response = TransactionResponse.fromTestMap(resultSet);
 
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping({"/history", "/history/"})
+    ResponseEntity<List<Transaction>> getHistory() {
+        val transactionList = service.getAll();
+        return ResponseEntity.ok(transactionList);
+    }
 
+    @GetMapping("/history/{number}")
+    ResponseEntity<List<Transaction>> getHistoryForCard(@PathVariable String number) {
+        val transactionList = service.getAllForNumber(number);
+        if (!cardNumberValidator.isValid(number)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        if (transactionList.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(transactionList);
+    }
+
+    @PutMapping({"/transaction", "/transaction/"})
+    ResponseEntity<Transaction> putFeedback(@RequestBody TransactionFeedbackRequest request) {
+        System.out.println("Correct method?");
+        val returned = service.submitFeedback(request.transactionId(), request.feedback());
+        return ResponseEntity.ok(returned);
+    }
 }

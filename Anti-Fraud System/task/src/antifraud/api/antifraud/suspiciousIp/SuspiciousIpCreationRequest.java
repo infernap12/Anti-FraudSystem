@@ -1,6 +1,6 @@
 package antifraud.api.antifraud.suspiciousIp;
 
-import antifraud.IpAddress;
+import antifraud.validation.IpAddress;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.Serializable;

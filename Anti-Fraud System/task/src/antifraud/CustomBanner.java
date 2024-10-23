@@ -104,7 +104,7 @@ public class CustomBanner implements Banner {
     }
 
     protected String getApplicationVersion() {
-        return "- Stage 4";
+        return "- Stage 6";
     }
 
     protected String getBootVersion() {

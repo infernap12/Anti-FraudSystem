@@ -6,7 +6,9 @@ public enum Authority {
     WRITE_USER,
     EXECUTE_TRANSACTION,
     STOLEN_CARD,
-    SUSPICIOUS_IP;
+    SUSPICIOUS_IP,
+    READ_TRANSACTION,
+    WRITE_TRANSACTION;
 
     public String getAuthority() {
         return name();

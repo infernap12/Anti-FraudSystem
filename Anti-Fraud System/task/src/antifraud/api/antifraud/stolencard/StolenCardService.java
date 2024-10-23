@@ -1,5 +1,6 @@
 package antifraud.api.antifraud.stolencard;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -44,8 +45,7 @@ public class StolenCardService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad card number");
         }
         return repo
-                .findByNumber(accountNumber.getAccountNumber())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Card not found"));
+                .findByNumber(accountNumber.getAccountNumber()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Card not found"));
     }
 
 

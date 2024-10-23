@@ -2,9 +2,12 @@ package antifraud.api.antifraud.transaction;
 
 import antifraud.api.antifraud.stolencard.StolenCardRepository;
 import antifraud.api.antifraud.suspiciousIp.SuspiciousIpRepository;
+import antifraud.limit.LimitService;
+import lombok.val;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.EnumMap;
 
 @Component
@@ -12,11 +15,13 @@ public class TransactionProcessor {
     private final StolenCardRepository stolenCardRepository;
     private final SuspiciousIpRepository suspiciousIpRepository;
     private final TransactionRepository transactionRepository;
+    private final LimitService limitService;
 
-    public TransactionProcessor(StolenCardRepository stolenCardRepository, SuspiciousIpRepository suspiciousIpRepository, TransactionRepository transactionRepository) {
+    public TransactionProcessor(StolenCardRepository stolenCardRepository, SuspiciousIpRepository suspiciousIpRepository, TransactionRepository transactionRepository, LimitService limitService) {
         this.stolenCardRepository = stolenCardRepository;
         this.suspiciousIpRepository = suspiciousIpRepository;
         this.transactionRepository = transactionRepository;
+        this.limitService = limitService;
     }
 
     public EnumMap<TransactionTests, TransactionVerdict> validate(Transaction transaction) {
@@ -66,10 +71,14 @@ public class TransactionProcessor {
     }
 
     private TransactionVerdict amount(Transaction transaction) {
-        if (transaction.getAmount() > 1500) {
+        if (transaction.getAmount() > limitService.getLimit(TransactionVerdict.MANUAL_PROCESSING).getValue()) {
             return TransactionVerdict.PROHIBITED;
-        } else if (transaction.getAmount() > 200) {
+        } else if (transaction.getAmount() > limitService.getLimit(TransactionVerdict.ALLOWED).getValue()) {
             return TransactionVerdict.MANUAL_PROCESSING;
         } else return TransactionVerdict.ALLOWED;
+    }
+
+    public static TransactionVerdict max(EnumMap<TransactionTests, TransactionVerdict> verdictEnumMap) {
+        return verdictEnumMap.values().stream().max(Comparator.comparingInt(Enum::ordinal)).get();
     }
 }

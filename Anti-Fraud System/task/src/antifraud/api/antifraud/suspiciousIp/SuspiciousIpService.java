@@ -1,6 +1,7 @@
 package antifraud.api.antifraud.suspiciousIp;
 
-import antifraud.IpAddressValidator;
+import antifraud.validation.IpAddressValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -21,13 +22,7 @@ public class SuspiciousIpService {
     }
 
     public boolean isValid(String ip) {
-        new IpAddressValidator().isValid(ip,null);
-        try {
-            InetAddress.getByName(ip);
-        } catch (UnknownHostException e) {
-            return false;
-        }
-        return true;
+        return new IpAddressValidator().isValid(ip);
     }
 
     public SuspiciousIpService(@Autowired SuspiciousIpRepository repo) {
@@ -36,8 +31,7 @@ public class SuspiciousIpService {
 
     public SuspiciousIp getIp(String ip) {
         return repo
-                .findByIp(ip)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ip not found"));
+                .findByIp(ip).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ip not found"));
     }
 
     public SuspiciousIp createIP(String ip) {
